@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<title>Favorites</title>
+	<link rel="shortcut icon" href="favicon.ico" />
+	<link rel="stylesheet" href="styles.css" />
+	
+	<script src="js/jquery.js"></script>
+	<script src="js/jquery.plugins.js"></script>
+	<script src="js/farbtastic.js"></script>
+	<script src="js/functions.js"></script>
+	<script src="js/menu.js"></script>
+	<script src="js/popup.js"></script>
+	<script>
+		$(document).ready(function() {
+			siteFunctions();
+		});
+	</script>
+	<noscript><p>You'd enjoy this much more if you had javascript.</p></noscript>
+</head>
+<body>
+	<header id="header"><div class="wrap">
+		<h1><a href="index.html">Favorites</a></h1>
+		<form method="" action="" id="searcher">
+			<input type="search" name="search" value="" placeholder="username" onkeyup="liveSearch(this.value)"/>
+			<input type="button" name="user_go" value="Search" onclick="searchUsers()"/>
+		</form>
+		<div id="liveResults"></div>
+		<div id="nav"></div>
+		<div id="menu_items"></div>
+	</div></header>
+	<ul id="breadcrumb">
+		<li id="home_crumb"><a href="index.html"></a></li>
+		<li><h6>About</h6></li>
+	</ul>
+	<div id="content">
+		<h2>Welcome</h2>
+		<aside id="staff">
+			<h5>The Staff</h5>
+			<article>
+				<img src="img/users/trav.jpg"/>
+				<h6>Name: Travis Leonard</h6>
+				<h6>Age: 23</h6>
+				<h6>Title: Webdesigner</h6>
+			</article>
+			<!--
+			<article>
+				<img src="img/users/mark.jpg"/>
+				<h6>Name: Mark Van Grieken</h6>
+				<h6>Age: 21</h6>
+				<h6>Title: Webdesigner</h6>
+			</article>
+			-->
+		</aside>
+		<div id="about">
+			<h5>About us</h5>
+			<p>We're simple, and just wanna have a good time. The basis of the site it to simplify keeping up with the billions of websites out there, specifically the partiular ones you might like.</p>
+			
+			<h5>How it works</h5>
+			<p>The website, referred to as favorites.com, will be a medium to link to everyone’s favorite websites.  As a home page, users will be shown some of the recently added favorites, the option to browse favorites by tags, and the ability to log in to access their own favorites. Once a user logs in, he or she will be sent to their personal pages, where all favorites, organized by lists, will be shown to the user. The user will be able to access and alter individual favorite’s lists as necessary. Users can use the simple add option to add a new favorite to any existing list or a new list, or go the individual list for more intense customization, such as deleting, editing, reordering, and also adding new favorites. Users will be able to create a list of friends they ‘track’ allowing them to see and follow their favorites as well. We hope to provide an intuitive portal for users to keep track of any and all of their favorite websites.</p>
+						
+			<h5>What we hope to give you</h5>
+			<p>A new favorite, to organize that electronic life you have. Another place in your digital life on the internet to spend time lurking.</p>
+			
+			<h5>Need to get in contact with us?</h5>
+			<h6>Got comments, suggestions, questions?</h6>
+			<p>Send us one of those <a href="mailto:mtv@favs.com">electronic mail</a> things.</p>
+			
+		</div>
+	</div><!-- content -->
+	
+	<footer>
+		<ul>
+			<li><h6>Site Index</h6></li>
+			<li><a href="index.html">Home</a></li>|
+			<li><a href="tags.html">Tags</a></li>|
+			<li><a href="about.html">About</a></li>
+		</ul>
+		<p>Copyright 2011 &copy; Travis K. Leonard
+	</footer>
+</body>
+</html>

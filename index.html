@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<title>Favorites</title>
+	<link rel="shortcut icon" href="favicon.ico"  type="image/x-icon" />
+	<link rel="apple-touch-icon" href="appleicon.png" />
+	<link rel="stylesheet" href="styles.css" />
+	
+	<script src="js/jquery.js"></script>
+	<script src="js/jquery.plugins.js"></script>
+	<script src="js/farbtastic.js"></script>
+	<script src="js/functions.js"></script>
+	<script src="js/menu.js"></script>
+	<script src="js/popup.js"></script>
+	<script>
+		$(document).ready(function() {
+			//$('body').css({opacity:0});
+			
+			if ((document.referrer == null || document.referrer.indexOf(window.location.hostname) < 0 ) && $.cookie('username') != undefined ) {
+					window.location.replace('user.html');
+			}
+			if ($.cookie('visited')) $('.intro').remove();
+			else $.cookie('visited', true);
+
+			var allUsers = new Array(),
+				allItems = new Array(),
+				allDates = new Array(),
+				allTags = new Array();
+				
+			// TOP, RECENT, TAGS LISTS
+			var getItems = $.get("xml/items.xml", function(items){
+				$(items).find('item').each(function(){
+					var item = new Array();
+			   		item['url'] = $(this).find('url').text();
+					item['title'] = $(this).find('title').text();
+					item['desc'] = $(this).find('desc').text();
+					item['date'] = $(this).attr('date');
+					item['listId'] = $(this).attr('listId');
+					item['userId'] = $(this).attr('userId');
+					allItems.push(item);
+					allDates.push($(this).attr('date'));
+					
+					/* tag information */
+					var itemTags =$(this).attr('tags').split(',');
+					for(var x = 0; x < itemTags.length; x++) {
+						var tagFound = false;
+						for(y = 0; y < allTags.length; y++)
+							if(allTags[y] == itemTags[x].trim())
+								tagFound = true;
+						if(!tagFound && itemTags[x].trim() != '')
+							allTags.push(itemTags[x].trim());
+					}
+				});
+			});
+			var getUsers = $.get("xml/users.xml",function(u) {
+				$(u).find('user').each(function() {
+					var user = new Array();
+						user['id'] = $(this).find('id').text();
+				   		user['name'] =  $(this).find('username').text();
+					allUsers.push(user);
+				});
+			});
+			getItems.complete(function() {
+				getUsers.complete(function() {
+					var userIds = randomNumArray(2,allUsers.length);				
+					
+					featuredList(allItems,allUsers,'featured1',userIds[0]);
+				   	featuredList(allItems,allUsers,'featured2',userIds[1]);
+	
+					topList(allItems);
+					recentList(allItems,allDates);
+					tagList(allTags);
+					
+					siteFunctions();
+					updateColor($.cookie('color'));
+					$('.list:even').css({'margin-right':'8px'});
+					$('.fonts').css({'margin-top':$('#header').height()+10});
+				}); // users complete
+			}); // items complete
+		}); // end doc ready
+		
+		// 'featured'/random users list
+		function featuredList(allItems,allUsers,htmlId,userId) {
+			var allLists = new Array(),
+				theUser = new Array(),
+				featuredListHTML = '';
+				
+			theUser['id'] = allUsers[userId]['id'];
+			theUser['name'] = allUsers[userId]['name'];
+			
+			var getLists = $.get("xml/lists.xml",function(l) {
+				$(l).find('list').each(function() {
+					if($(this).attr('userId') == theUser['id']) {
+						var list = new Array();
+						list['title'] = $(this).find('title').text();
+						list['id'] = $(this).find('id').text();
+						list['user'] = $(this).attr('userId');
+						allLists.push(list);
+					}
+				});
+			});
+			getLists.complete(function() {
+				var featuredItems = new Array(),
+					randListNum = Math.floor(Math.random()* (allLists.length)),
+					randList = allLists[randListNum];
+
+				featuredListHTML += "<h4>Featured : "
+					+ "<a href='list.html?title=" + randList['title'] + "&user=" + theUser['name'] + "'>" + randList['title'] + "</a>\n- <a href='user.html?u=" + theUser['name'] + "'>" + theUser['name'] + "</a></h4><ol>";
+				
+				for (var x = 0; x < allItems.length; x++) {
+					if (allItems[x]['listId'] == randList['id'] && allItems[x]['userId'] == theUser['id']) 
+						featuredItems.push(allItems[x]);
+				}
+				for(var i = 0; i < featuredItems.length; i++) {
+					featuredListHTML += "<li><a href='"+featuredItems[i]['url']+"'>"+featuredItems[i]['title']+"</a>"+featuredItems[i]['desc']+"</li>";
+				}
+				featuredListHTML += "</ol>";
+				$('#' + htmlId).html(featuredListHTML);
+			});
+		}
+		// top/random items list
+		function topList(allItems) {
+			var	randomNums = randomNumArray(10,allItems.length),
+				topItemsHTML = '<h4>Top Favorites</h4>\n<ol>';
+			
+			
+			for(var x = 0; x < randomNums.length; x++){
+				var url = allItems[randomNums[x]]['url'],
+					title = allItems[randomNums[x]]['title']
+					desc = allItems[randomNums[x]]['desc'];
+				
+				topItemsHTML += '<li><a href="' + url + '">' + title + '</a>' + desc + '</li>';
+			}
+			topItemsHTML += '</ol>';
+			$('#top').html(topItemsHTML);
+		}
+		// recent items list
+		function recentList(allItems,allDates) {
+			var itemNums = 0,
+				recentItems = new Array(),
+				recentItemsHTML = '<h4>Recent Favorites</h4>\n<ol>';
+				
+			allDates.sort(date_sort_desc);
+			// add times to better determine
+			for (var y = 0; y < allDates.length; y++) {
+				for (var x = 0; x < allItems.length; x++) {
+					if( allDates[y] == allItems[x]['date'] ) {
+						if (itemNums == 10) break;
+						var item = new Array();
+							item['url'] = allItems[x]['url'];
+							item['title'] = allItems[x]['title'];
+							item['desc'] = allItems[x]['desc'];
+						recentItems.push(item);
+						itemNums++;
+					}
+				}
+			}
+			for(var z = 0; z < 10; z++) {
+				var url = recentItems[z]['url'],
+					title = recentItems[z]['title']
+					desc = recentItems[z]['desc'];
+				recentItemsHTML += '<li><a href="' + url + '">' + title + '</a>' + desc + '</li>';
+			}
+			recentItemsHTML += '</ol>';
+			$('#recent').html(recentItemsHTML);
+		}
+		// random tags list
+		function tagList(allTags) {
+			var tagHTML = '',
+				tagCount = 0,
+				randomTagNums = randomNumArray(14,allTags.length);
+		
+			for(var	x = 0; x < randomTagNums.length; x++) {
+				if (allTags[randomTagNums[x]] != '')
+					tagHTML += '<li><a href="tags.html?t=' +allTags[randomTagNums[x]]+ '">' +allTags[randomTagNums[x]]+ '</a></li>';
+			}			
+			
+			$('#tags_line').find('ol').prepend(tagHTML);
+		}
+		// creates an array of random numbers of a specific length
+		function randomNumArray(number,allLength) {
+			var nums = new Array();
+			
+			while (nums.length < number) {
+				var randomnumber = Math.floor(Math.random()* allLength),
+					found=false;
+				for (var i = 0; i < nums.length; i++){
+					if(nums[i]==randomnumber){
+						found=true;
+						break;
+					}
+				}
+				if (!found)
+					nums[nums.length]=randomnumber;
+			}
+			return nums;
+		}
+		var date_sort_desc = function (date1, date2) {
+			// Comparison function that results in dates being sorted in DESCENDING order.
+			if (date1 > date2) return -1;
+			if (date1 < date2) return 1;
+			return 0;
+		}
+		function fade() { $('body').delay(500).animate({opacity: 1}, 1500); }
+	</script>
+	<noscript>You'd enjoy this much more if you had javascript.</noscript>
+</head>
+<body>
+	<header id="header">
+		<div class="wrap">
+			<h1><a href="index.html">Favorites</a></h1>
+			<form method="" action="" id="searcher">
+				<input type="search" name="search" value="" placeholder="username" onkeyup="liveSearch(this.value)" onsearch="searchUsers()"/>
+				<input type="button" name="user_go" value="Search" onclick="searchUsers()"/>
+			</form>
+			<div id="liveResults"></div>
+			<div id="nav"></div>
+			<div id="menu_items"></div>
+		</div>
+	</header>
+	<section class="fonts">
+		<ul>
+			<li onclick="resizeText(-1)">A</li>
+			<li onclick="resizeText(0)">A</li>
+			<li onclick="resizeText(1)">A</li>
+		</ul>
+	</section>
+	<div id="content" class="spacer">
+		<h2>Bookmarking Made Easy</h2>
+		<p class="intro">We are here to provide a simple, intuitive, accessible site to compile of all of your other favorite sites. Instead of storing bookmarks solely in a browser, our hope is to provide a web-based experience for users to track their personal favorites. The idea and hope is that a website, accessible from any internet-capable device, will be an easier way for people to maintain lists of their favorite websites. To learn more about us, go <a href="about.html">here</a>.
+			</p>
+		<section id="top" class="list"></section>
+		<section id="recent" class="list"></section>
+		<section id="featured1" class="list"></section>
+		<section id="featured2" class="list"></section>	
+		<section id="tags_line">
+			<h4>Tags</h4>
+			<ol>
+				<li><h6><a href="tags.html">All Tags</a></h6></li>
+			</ol>
+		</section>
+	</div><!-- content -->
+	<footer>
+		<ul>
+			<li><h6>Site Index</h6></li>
+			<li><a href="index.html">Home</a></li>|
+			<li><a href="tags.html">Tags</a></li>|
+			<li><a href="about.html">About</a></li>
+		</ul>
+		<p>Copyright 2011 &copy; Travis K. Leonard
+	</footer>
+</body>
+</html>

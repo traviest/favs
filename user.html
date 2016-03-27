@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<title>Favorites</title>
+	<link rel="shortcut icon" href="/favicon.ico" />
+	<link rel="stylesheet" href="styles.css" />
+	
+	<script src="js/jquery.js"></script>
+	<script src="js/jquery.plugins.js"></script>
+	<script src="js/farbtastic.js"></script>
+	<script src="js/functions.js"></script>
+	<script src="js/menu.js"></script>
+	<script src="js/popup.js"></script>
+	<script>
+		$(document).ready(function() {
+
+			//var loadUser = "<?html echo strip_tags( trim( $_GET['u'] ) ); ?>",
+			//	loggedInUser = "<?html echo $_COOKIE['username']; ?>",
+			//	showUser;
+			
+			var vars = window.location.href.indexOf("?");
+			if (vars >= 0)
+				var loadUser = getValue("u");
+			
+			var loggedInUser = $.cookie("username");
+			
+			if(loadUser)
+				showUser = loadUser;
+			else if (loggedInUser)
+				showUser = loggedInUser;
+			
+			/***** LOAD USER INFO *****/
+			var usersID,
+				userFound = false;
+				userDetails = '';
+				userInfo = new Array();
+			var getUserInfo = $.get("xml/users.xml",function(u) {
+				$(u).find('user').each(function() {
+					var username = $(this).find('username').text();
+					if(username == showUser) {
+						usersID = $(this).find('id').text();
+						var	name = $(this).find('name').text(),
+							location = $(this).find('location').text(),
+							routine = $(this).find('routine').text(),
+							pic = $(this).find('pic').text();
+						userInfo.push(username,name,location,routine,pic);
+						userFound = true;
+					}
+				});
+				
+			});
+			getUserInfo.complete(function() {
+				var userHTML = '';
+				if(userInfo[4] != undefined && userInfo[4] != '')
+					userHTML += '<img src="img/users/'+userInfo[4]+'" class="user_pic"/><table>';
+				else
+					userHTML += '<img src="img/user_b.png"/><table>';
+				userHTML += '<tr><td>Username:</td><td><a href="user.html?u=' +userInfo[0]+ '">' +userInfo[0]+ '</a></td></tr>'
+					+ '<tr><td>Name:</td><td>'+userInfo[1]+'</td></tr>'
+					+ '<tr><td>Location:</td><td>'+userInfo[2]+'</td></tr>'
+					+ '<tr><td>Routine:</td><td>'+userInfo[3]+'</td></tr></table>';
+					
+				$('<a href="#" id="friends_list" onclick="showFriends(\''+showUser+'\')">Friends</a>').appendTo('#user_block');	
+				if(loggedInUser != showUser)
+					$('<a href="#" id="tracker" onclick="trackUser(\''+showUser+'\')">Track</a>').appendTo('#user_block');
+	
+				$(userHTML).appendTo('#user_block');
+				userDetails = '<h3>'+userInfo[0]+' ';
+				
+				var allListsHTML = '',
+					lists = new Array(),
+					items = new Array();
+				
+				var getLists = $.get("xml/lists.xml",function(l) {
+					$(l).find('list').each(function() {
+						var listUser = $(this).attr('userId'),
+							listId = $(this).find('id').text(),
+							listTitle = $(this).find('title').text();
+						
+						if(usersID == listUser)
+							lists.push(listId+'|'+listTitle);
+					});
+				});
+				var itemCount = 0;
+				var getItems = $.get("xml/items.xml", function(d) {
+					$(d).find('item').each(function(){
+				        var itemInfo = new Array();
+				        	userId = $(this).attr('userId'),
+				        	date = $(this).attr('date'),
+				        	listId = $(this).attr('listId'),
+				        	listItemNum = $(this).attr('listItemNum'),
+				        	tags = $(this).attr('tags'),
+				        	title = $(this).find('title').text(),
+				        	url = $(this).find('url').text(),
+				        	desc = $(this).find('desc').text();
+				        
+				        if(usersID == userId) {
+				        	itemInfo = listId+'|'+listItemNum+'|'+tags+'|'+title+'|'+url+'|'+desc;
+				        	items.push(itemInfo);
+				        	itemCount++;
+				        }
+				    });
+				});
+				getLists.complete(function() {
+					getItems.complete(function() {
+						for(x = 0; x < lists.length; x++) {
+							var listDetails = lists[x].split('|'),
+								listHTML = '<section class="list">'
+									+ '<h4><a href="list.html?title='+listDetails[1]+'&user='+showUser+'">'+listDetails[1]+'</a></h4>'
+									+ '<ol id="'+listDetails[1]+'">';
+							
+							var listItems = new Array();		
+							for(y = 0; y < items.length; y++) {
+								var itemDetails = items[y].split('|'),
+									itemListId = itemDetails[0],
+									itemListNum = itemDetails[1],
+									itemTags = itemDetails[2].split('|'),
+									itemTitle = itemDetails[3],
+									itemURL = itemDetails[4],
+									itemDesc = itemDetails[5];
+									
+								if(itemListId == listDetails[0]) {
+									listItems.push(itemListNum + "|" + itemListId + "|" + itemTitle + "|" + itemURL + "|" + itemDesc);
+								}
+								if ((y + 1) == items.length) {
+	                                listItems.sort();
+	                                for(z = 0; z < listItems.length; z++) {
+	                                    var listItemDetails = listItems[z].split("|");
+	                                    var itemNumber = listItemDetails[0],
+	                                        listId = listItemDetails[1],
+	                                        itemTitle = listItemDetails[2],
+	                                        itemURL = listItemDetails[3],
+	                                        itemDesc = listItemDetails[4];
+	                                    
+	                                    listHTML += '<li id="listItem_' +itemNumber+ '"><a href="' +itemURL+ '">' +itemTitle+ '</a>' +itemDesc+ '</li>';
+	                                }
+	                            }
+							}
+							listHTML += '</ol></section>';
+							allListsHTML += listHTML;
+						}
+						
+						userDetails += '- <span>'+itemCount+' favorites</span></h3>';
+						$('#user_details').append(userDetails);
+						
+						if(userFound == false)
+							$('#content').html("The user wasn't found, bugs got 'em").fadeIn(300);
+						else 
+							$(allListsHTML).appendTo('#content');
+						
+						/* initialize site functions */
+						siteFunctions();
+						$('.list:even').css({'margin-right':'10px'});
+						
+						/* build icons view */
+						var iconsHTML = '';
+						$('#content').find('.list').each(function() {
+							var title = $(this).find('h4').text();
+							iconsHTML += '<section name="'+title+'">'
+									+ '<h4><a href="list.html?title='+title+'">'+title+'</a><span></span></h4>';
+							$(this).find('li').each(function() {
+								var link = $(this).find('a');
+								iconsHTML += '<article>';
+								//if(link.attr('name') != "") 
+									iconsHTML += '<img src="img/sites/'+link.text()+'.png" />';
+								iconsHTML += '<h6><a href="'+link.attr('href')+'">'+link.text()+'</a></h6>'
+								 	+ '</article>';
+							});
+							iconsHTML += '</section><div class="separator"></div>';	
+						});
+						$('#icons').append(iconsHTML).css({display:'none'});
+						$('#icons h6 a').favicons();
+						
+						/* shows/hides a list block of icons */
+						$('#icons h4 span').click(function() {
+							$(this).toggleClass('shown');
+							var icons = $(this).parent('h4').siblings().get();
+							$(icons).slideToggle(300);
+						});
+						
+						/* animates icon image hover to show title/link */
+						$('#icons article').hover(function() {
+							$(this).find('h6').animate({top:'5px'},150);
+						}, function() {
+							$(this).find('h6').animate({top:'-30px'},150);
+						});
+						
+					}); // user items
+				}); // user lists
+			}); // user info
+			
+			/* user block toggle */
+			$('#user_block_hide').click(function() {
+				$('#user_block').slideUp(300);
+				$('#user_details').css({ display:'block', opacity:0}).stop().animate({opacity:1});
+				return false;
+			});
+			$('#user_block_show').click(function() {
+				$('#user_block').slideDown(300);
+				$('#user_details').css({ display: 'none', opacity: 0 });
+				return false;
+			});
+			
+			/* views change */
+			$('#views > li').click(function() {
+				if($(this).attr('id') == 'view_icon') {
+					$('.list').css({display:'none'});
+					$('#icons').css({display:'block'});
+				} else if($(this).attr('id') == 'view_list') {
+					$('#icons').css({display:'none'});
+					$('.list').css({display:'inline-block'});
+				}
+				$('.active').removeClass('active');
+				$(this).addClass('active');
+			});
+			$('#view_list').addClass('active');
+		});
+		
+		function trackUser(username) {
+			var successMsg = "<p class=\"successMsg\">You'll now track "+username+" every move</p>";
+			$('.successMsg').remove();
+			$(successMsg).insertBefore('#user_block').fadeIn(300);
+			$('#tracker').fadeOut(300);
+			setTimeout(function() {
+				$('.successMsg').fadeOut(300);
+			}, 7000);
+		}
+		
+		function showFriends(username) {
+			var users = new Array(),
+				friends = new Array(),
+				userId,
+				friendsHTML;
+			
+			var getFriends = $.get("xml/friends.xml", function(f) {
+				$(f).find('friend').each(function() {
+					var muser = $(this).find('mainuser').text(),
+						tuser = $(this).find('trackeduser').text(),
+						bond = muser+'|'+tuser;
+					friends.push(bond);
+				});
+			});	
+			var getUsers = $.get("xml/users.xml", function(u) {
+				$(u).find('user').each(function(){
+					var id = $(this).find('id').text(),
+						user = $(this).find('username').text(),
+						pic = $(this).find('pic').text(),
+						userInfo = user+'|'+id+'|'+pic;
+					users.push(userInfo);
+					if(user == username)
+						userId = id;
+				});
+			});
+			getUsers.complete(function() {
+				getFriends.complete(function() {
+				
+					friendsHTML = '<h3>'+username+'\'s friends</h3><ol class="friends">';
+					
+					for(x = 0; x < friends.length; x++) {
+						var stats = friends[x].split('|');
+						for(y = 0; y < users.length; y++) {
+							var userInfo = users[y].split('|'),
+								user = userInfo[0], usersId = userInfo[1], userPic = userInfo[2];
+							if(userId == stats[0])
+								if(usersId == stats[1])
+									friendsHTML += '<li><img src="img/users/'+userPic+'"/>'
+												+ '<h6><a href="user.html?u='+user+'">'+user+'</a></h6></li>';
+						}
+					}
+					$('body').append('<div id="popup"><div id="frame"></div></div>');
+					$('#frame').html('<a href="#" id="close_popup" onclick="closePopup()"></a>'+friendsHTML+'</ol>');
+					$('#popup').css({display:'block', opacity:0}).stop().animate({opacity:1});
+					$('#frame').css({position: 'absolute',  
+						top: document.documentElement.clientHeight/2-$('#frame').height()/2,  
+						left: document.documentElement.clientWidth/2-$('#frame').width()/2,
+						display: 'block', opacity: 0 }).stop().animate({opacity:1});
+					updateColor($.cookie('color'));
+					linksHover();
+					
+					
+				});
+			});
+		}
+	</script>
+	<noscript><p>You'd enjoy this much more if you had javascript.</p></noscript>
+</head>
+<body>
+	<header id="header"><div class="wrap">
+		<h1><a href="index.html">Favorites</a></h1>
+		<form method="" action="" id="searcher">
+			<input type="search" name="search" value="" placeholder="username" onkeyup="liveSearch(this.value)"/>
+			<input type="button" name="user_go" value="Search" onclick="searchUsers()"/>
+		</form>
+		<div id="liveResults"></div>
+		<div id="nav"></div>
+		<div id="menu_items"></div>
+	</div></header>
+	<ul id="breadcrumb">
+		<li id="home_crumb"><a href="index.html"></a></li>
+		<li><h6>User</h6></li>
+	</ul>
+	<div id="content">
+		<article id="user_block">
+			<a href="#" id="user_block_hide">Hide</a>
+		</article>
+		<div id="user_details">
+			<a href="#" id="user_block_show">Show User Info</a>
+		</div>
+		<div class="clear"></div>
+	</div><!-- content -->
+	<footer>
+		<ul>
+			<li><h6>Site Index</h6></li>
+			<li><a href="index.html">Home</a></li>|
+			<li><a href="tags.html">Tags</a></li>|
+			<li><a href="about.html">About</a></li>
+		</ul>
+		<p>Copyright 2011 &copy; Travis K. Leonard
+	</footer>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<users>
+	<user>
+		<id>1</id>
+		<username>traviest</username>
+		<password>password</password>
+		<name>Travis K. Leonard</name>
+		<email>traviest@gmail.com</email>
+		<location>Johnson City, TN</location>
+		<routine>College and Mellow Mushroom</routine>
+		<pic>trav.jpg</pic>
+		<color>rgb(32,143,162)</color>
+	</user>
+	<user>
+		<id>2</id>
+		<username>parkthetardis</username>
+		<password>jpie225415</password>
+		<name>Kiwi Ann Durland</name>
+		<email></email>
+		<location>Johnson City, TN</location>
+		<routine>Bitchin' at the 'shroom and nightly a gamergurl</routine>
+		<pic>kiwi.jpg</pic>
+		<color>rgb(199,46,45)</color>
+	</user>
+	<user>
+		<id>3</id>
+		<username>SirMagsALot</username>
+		<password>Pepie603</password>
+		<name>Maggie Parris</name>
+		<email></email>
+		<location>Tennessee</location>
+		<routine>stylin' and profilin'</routine>
+		<pic>mags.jpg</pic>
+		<color></color>
+	</user>
+	<user>
+		<id>4</id>
+		<username>guitarmonsta</username>
+		<password>bassjunkie</password>
+		<name>Jon Radford</name>
+		<email></email>
+		<location>Johnson City</location>
+		<routine>Smoke weed ere'day!</routine>
+		<pic>jon.jpg</pic>
+		<color></color>
+	</user>
+	
+	<user>
+		<id>5</id>
+		<username>CRTL</username>
+		<password>crtl</password>
+		<name>Christopher Robinson</name>
+		<email></email>
+		<location>Johnson City</location>
+		<routine>Forever clothes</routine>
+		<pic>cr.jpg</pic>
+		<color>rgb(200,20,20)</color>
+	</user>
+	<user>
+		<id>6</id>
+		<username>zonin666</username>
+		<password>hank</password>
+		<name>Emz</name>
+		<email></email>
+		<location>TN</location>
+		<routine>Mellow mushin' it</routine>
+		<pic>emz.jpg</pic>
+		<color></color>
+	</user>
+</users>

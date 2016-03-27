@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<title>Favorites</title>
+	<link rel="shortcut icon" href="favicon.ico" />
+	<link rel="stylesheet" href="styles.css" />
+	
+	<script src="js/jquery.js"></script>
+	<script src="js/jquery.plugins.js"></script>
+	<script src="js/farbtastic.js"></script>
+	<script src="functions.js"></script>
+	<script>
+		$(document).ready(function() {
+		
+			var requestedList = "<?php echo $_GET['title']; ?>",
+				requestedUser = "<?php echo $_GET['user']; ?>",
+				showUser = this,
+				usersID,
+				listFound = false;
+			
+			if(requestedList) {
+				if(requestedUser)
+					showUser = requestedUser;
+				else 
+					showUser = $.cookie('username');
+			}
+				var getUserInfo = $.get("xml/users.xml",function(u) {
+				var findUser;
+				$(u).find('user').each(function() {
+					findUser = $(this).find('username').text();
+					if(findUser == showUser)
+						usersID = $(this).find('id').text();
+				});
+				if(!findUser) {
+					$('#content').html('<p class="errorMsg">No user found, bugs got \'em</p>');
+				}
+			});
+			/*** REWORK ***** ^^^^^^ */
+			getUserInfo.complete(function() {
+				
+				var lists = new Array(),
+					items = new Array();
+					
+				var getLists = $.get("xml/lists.xml",function(l) {
+					$(l).find('list').each(function() {
+						var listUser = $(this).attr('userId'),
+							listId = $(this).find('id').text(),
+							listTitle = $(this).find('title').text();
+						
+						if(usersID == listUser)
+							lists.push(listId+'|'+listTitle);
+					});
+				});
+				var getItems = $.get("xml/items.xml", function(d) {
+					$(d).find('item').each(function(){
+				        var itemInfo = new Array();
+				        	userId = $(this).attr('userId'),
+				        	listId = $(this).attr('listId'),
+				        	listItemNum = $(this).attr('listItemNum'),
+				        	tags = $(this).attr('tags'),
+				        	title = $(this).find('title').text(),
+				        	url = $(this).find('url').text(),
+				        	desc = $(this).find('desc').text();
+				        
+				        if(usersID == userId) {
+				        	itemInfo = listId+'|'+listItemNum+'|'+tags+'|'+title+'|'+url+'|'+desc;
+				        	items.push(itemInfo);
+				        }
+				    });
+				});
+				/* BUILD CONTENT */
+				var listTitles = new Array(),
+					listTitlesHTML = '',
+					allListsHTML = '';
+					
+				getLists.complete(function() {
+					getItems.complete(function() {
+						
+						listTitlesHTML += '<ol id="lists_titles">'
+							+ '<li><h4><a href="user.php?u='+showUser+'">'+showUser+'</a> lists</h4></li>';
+						
+						for(x = 0; x < lists.length; x++) {
+							
+							var listDetails = lists[x].split('|'),
+								listHTML;
+							
+							if(listDetails[1] == requestedList) {
+								listTitlesHTML += '<li class="current_list"><a href="#">'+listDetails[1]+'</a></il>';
+								listHTML = '<section class="list_wide" id="displayed_list" name="'+listDetails[1]+'">'
+									+ '<h4>'+listDetails[1]+'</h4><ol>';
+								listFound = true;
+							} else {
+								listTitlesHTML += '<li><a href="#">'+listDetails[1]+'</a></il>';
+								listHTML = '<section class="list_wide" name="'+listDetails[1]+'">'
+									+ '<h4>'+listDetails[1]+'</h4><ol>';
+							}	
+							/* for list, search for matched items */	
+							for(y = 0; y < items.length; y++) {
+								var itemDetails = items[y].split('|'),
+									itemListId = itemDetails[0],
+									itemListNum = itemDetails[1],			/* item number in list */
+									itemTags = itemDetails[2].split('|'), 	/* array of all item tags */
+									itemTitle = itemDetails[3],
+									itemURL = itemDetails[4],
+									itemDesc = itemDetails[5];
+									
+								if(itemListId == listDetails[0]) {
+									listHTML += '<li><a href="'+itemURL+'">'+itemTitle+'</a>'+itemDesc+'</li>';
+								}
+							}
+							
+							if(x + 1 == lists.length) {
+								listTitlesHTML +='</ol>';
+								if($.cookie('username') == showUser)
+									listTitlesHTML += '<a href="#" id="newList" onclick="newList()">New List</a>';
+							}
+							
+							listHTML += '</ol></section>';
+							allListsHTML += listHTML;
+						}
+																	
+						$('#content').append(listTitlesHTML + allListsHTML);
+						
+						if(!listFound) { // list not found
+						 	/* shows displayed user (if found) or logged in users first list */
+						 	$('.list_wide:first').attr('id','displayed_list');
+						 	var titles = $('#lists_titles');
+						 	
+						 	
+						 		
+						 	var errorMsg = "<p class=\"errorMsg\">Woops. Something ugly happened, we couldn't find the list.</p>";
+						 	$(errorMsg).insertBefore('.edit').fadeIn(300);
+
+						 	setTimeout(function() {
+						 		$('.errorMsg').fadeOut(300);
+						 	}, 7000);
+						}
+						
+						var minHeight = $('#lists_titles').height() - 10; /* displayed_list has 10px padding */
+						$('#displayed_list').css({'min-height':minHeight});
+						
+						$('#lists_titles > li > a').click(function() {
+							$('.current_list').removeClass('current_list');
+							$(this).parent('li').addClass('current_list');
+							$('#displayed_list').removeAttr('id');
+							var newList = $(this).text();
+							$('.list_wide').each(function() {
+								if($(this).attr('name') == newList)
+									$(this).attr('id','displayed_list').css({'min-height':minHeight});
+							});
+						});
+						
+						/* initialize site functions */
+						siteFunctions();
+						
+					}); // user items
+				}); // user lists
+			}); // user info
+		});
+		function newList() {
+			var HTML = '<section class="fader"><input type="text" name="" id="" value="" placeholder="New list title"/>'
+					+ '<input type="text" name="" id="" value="Add New List"/></section>';
+			$('.fader').remove();
+			$('#content').append(HTML);
+			$('.fader').fadeIn(300);		
+		}
+	</script>
+	<noscript><p>You'd enjoy this much more if you had javascript.</p></noscript>
+</head>
+<body>
+	<header id="header"><div class="wrap">
+		<div id="nav">
+			<a href="#" id="friends_link">Friends</a>
+			<a href="#" id="lists_link">Lists</a>
+			<a href="#" id="add_link">Add</a>
+			<a href="#" id="color_link">Color</a>
+			<a href="#" id="account_link">User</a>
+			<a href="#" id="member_link">SignIn</a>
+		</div>
+		<h1><a href="index.html">Favorites</a></h1>
+		<div id="menu_items"></div>
+		<ul id="breadcrumb">
+			<li id="home_crumb"><a href="index.html"></a></li>
+			<li>List</li>
+		</ul>
+	</div></header>
+	<div id="content">
+		<a href="#" class="edit" title="list" onclick="popup('edit')">Edit</a>
+		
+	</div><!-- content -->
+	<footer>
+		<ul>
+			<li><h6>Site Index</h6></li>
+			<li><a href="index.html">Home</a></li>|
+			<li><a href="tags.php">Tags</a></li>|
+			<li><a href="about.html">About</a></li>
+		</ul>
+		<p>Copyright 2011 &copy; Travis K. Leonard
+	</footer>
+</body>
+</html>

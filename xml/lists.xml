@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lists>
+	<list userId="1">
+		<id>1</id>
+		<title>Web Design</title>
+	</list>
+	<list userId="1">
+		<id>2</id>
+		<title>Inspiration</title>
+	</list>
+	<list userId="1">
+		<id>3</id>
+		<title>Music</title>
+	</list>
+	<list userId="1">
+		<id>4</id>
+		<title>News</title>
+	</list>
+	<list userId="1">
+		<id>5</id>
+		<title>Humor</title>
+	</list>
+	<list userId="1">
+		<id>6</id>
+		<title>Social</title>
+	</list>
+	<list userId="1">
+		<id>7</id>
+		<title>Favs</title>
+	</list>
+	
+	<list userId="2">
+		<id>1</id>
+		<title>Games</title>
+	</list>
+	<list userId="2">
+		<id>2</id>
+		<title>Favs</title>
+	</list>
+	
+	<list userId="3">
+		<id>1</id>
+		<title>Favs</title>
+	</list>
+	
+	<list userId="4">
+		<id>1</id>
+		<title>Favs</title>
+	</list>
+	<list userId="5">
+		<id>1</id>
+		<title>Fashion</title>
+	</list>
+	<list userId="5">
+		<id>2</id>
+		<title>Favs</title>
+	</list>
+<list userId="6"><id>1</id><title>Favs</title></list>
+<list userId="1"><id>8</id><title>Shops</title></list>
+<list userId="1" private="true"><id>9</id><title>Life</title></list>
+<list userId="6"><id>2</id><title>Social</title></list></lists>

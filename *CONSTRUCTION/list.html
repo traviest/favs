@@ -1,0 +1,161 @@
+<?php
+	$title = 'none';
+	if($_GET['title'].isset) {
+		$title = $_GET['title'];
+	}
+	
+?>
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<title>Favorites</title>
+	<link rel="shortcut icon" href="favicon.ico" />
+	<link rel="stylesheet" href="../styles.css" />
+	
+	<script src="../js/jquery.js"></script>
+	<script src="../js/jquery.plugins.js"></script>
+	<script src="../js/farbtastic.js"></script>
+	<script src="../functions.js"></script>
+	<script>
+		$(document).ready(function() {
+		
+			/* use php
+							
+				if user set
+					load list by user and title
+				else if 
+					load list by title of logged in user
+				else 
+					error
+			*/
+			
+			siteFunctions();
+			
+			var minHeight = $('#lists_titles').height() - 20; /* displayed_list has 10px padding */
+			$('#displayed_list').css({'min-height':minHeight});
+			/* use php get to determined request list rather than default */
+			var requested_list = '<?= $title ?>';
+			alert(requested_list);
+			
+			$('#lists_titles > li > a').click(function() {
+				$('.current_list').removeClass('current_list');
+				$(this).parent('li').addClass('current_list');
+				$('#displayed_list').removeAttr('id');
+				var newList = $(this).text();
+				$('.list_wide').each(function() {
+					if($(this).attr('name').replace('_',' ') == newList)
+						$(this).attr('id','displayed_list').css({'min-height':minHeight});
+				});
+			});
+		});
+	</script>
+	<noscript><p>You'd enjoy this much more if you had javascript.</p></noscript>
+</head>
+<body>
+	<header id="header"><div class="wrap">
+		<div id="nav">
+			<a href="#" id="friends_link">Friends</a>
+			<a href="#" id="lists_link">Lists</a>
+			<a href="#" id="add_link">Add</a>
+			<a href="#" id="color_link">Color</a>
+			<a href="#" id="account_link">User</a>
+			<a href="#" id="member_link">SignIn</a>
+		</div>
+		<h1><a href="index.html">Favorites</a></h1>
+		<div id="menu_items"></div>
+		<ul id="breadcrumb">
+			<li id="home_crumb"><a href="index.html"></a></li>
+			<li>List</li>
+		</ul>
+	</div></header>
+	<div id="content">
+		<ol id="lists_titles">
+			<li><h4><a href="user.php?u=traviest">traviest's</a> lists</h4></li>
+			<li class="current_list"><a href="#">Web Design</a></li>
+			<li><a href="#">Inspiration</a></li>
+			<li><a href="#">Music</a></li>
+			<li><a href="#">News</a></li>
+			<li><a href="#">Humor</a></li>
+			<li><a href="#">Movies</a></li>
+			<li><a href="#">Other</a></li>
+		</ol>
+		<a href="#" class="edit" title="list" onclick="popup('edit')">Edit</a>
+		<section class="list_wide" id="displayed_list" name="Web_Design">
+			<h4>Web Design</h4>
+			<ol>
+				<li><a href="http://net.tutsplus.com/">Net.Tuts+</a>Tutorials for all things internet</li>
+				<li><a href="http://webdesign.tutsplus.com/">WebDesign.Tuts+</a>Tutorials for WebDesigners</li>
+				<li><a href="http://designmoo.com">DesignMoo</a>Discover and share quality design resources</li>
+				<li><a href="http://dribbble.com">Dribbble</a>What are you working on?</li>
+				<li><a href="http://365psd.com">365PSD</a>A PSD everyday of the year</li>
+				<li><a href="http://www.webdesignerwall.com/">WebDesignerWall</a>A wall of design ideas, web trends, and tutorials</li>
+				<li><a href="http://www.smashingmagazine.com/">Smashing Magazine</a>Useful and innovative information for web designers</li>
+				<li><a href="http://cssglobe.com">CSSGlobe</a>The web design magazine</li>	
+			</ol>
+		</section>
+		<section class="list_wide" name="Inspiration">
+			<h4>Inspiration</h4>
+			<ol>
+				<li><a href="http://www.komodomedia.com/">KomodoMedia</a>Captivating aesthetic design for the web</li>
+				<li><a href="http://dragoninteractive.com/">Dragon Interavtive</a>design agency based in Los Angeles</li>
+				<li><a href="http://www.metalabdesign.com/">Metalab</a>Interface Extraoidinaires</li>
+				<li><a href="http://elev8tor.com/home">ELEV8TOR</a>Your creative lift</li>
+				<li><a href="24ways.org">24Ways</a>To impress your friends</li>
+				<li><a href="http://danwiersema.com/">DanWiersema</a>Graphic Designer</li>
+				<li><a href="http://mantia.me/">Mantia</a>Interface Designer</li>
+				<li><a href="http://www.toffeenutdesign.com/">ToffeeNut</a>Visual Designer</li>
+			</ol>
+		</section>
+		<section class="list_wide" name="Music">
+			<h4>Music</h4>
+			<ol>
+				<li><a href="http://designers.mx">Designers.MX</a>Beautifully designed mixes</li>
+				<li><a href="http://pumpthebeat.com">PumpTheBeat</a>Best fist pumping tracks</li>
+				<li><a href="http://www.thesixtyone.com/">The61</a>Artists provide the music, listeners decide what makes it</li>
+				<li><a href="http://listen.grooveshark.com">Grooveshark</a>Free online music library and internet radio</li>
+				<li><a href="http://www.pandora.com">Pandora</a>A new kind of radio</li>
+				<li><a href="http://www.purevolume.com">Purevolume</a>Discovery of new music and emerging artists</li>
+			</ol>
+		</section>
+		<section class="list_wide" name="News">
+			<h4>News</h4>
+			<ol>
+				<li><a href="http://www.newser.com">Newser</a>Read less, know more</li>
+				<li><a href="http://www.engadget.com">Engadget</a>Obsessive coverage of everything electronics</li>
+				<li><a href="http://www.tuaw.com">TUAW</a>The unofficial apple weblog</li>
+				<li><a href="http://www.macrumors.com">MacRumors</a> All Rumors, All Mac</li>
+			</ol>
+		</section>
+		<section class="list_wide" name="Humor">
+			<h4>Humor</h4>
+			<ol>
+				<li><a href="http://www.urbandictionary.com">UrbanDictionary</a>The dictionary written by you</li>
+				<li><a href="http://www.twiapp.com">twiapp.com</a>Texting while intoxicated</li>
+				<li><a href="highdeas.com">hIghDEAS</a>The best ideas (when you're high)</li>
+			</ol>
+		</section>
+		<section class="list_wide" name="Movies">
+			<h4>Movies</h4>
+			<ol>
+				<li><a href="http://www.imdb.com">IMDb</a>The Internet Movie Database</li>
+			</ol>
+		</section>
+		<section class="list_wide" name="Other">
+			<h4>Other</h4>
+			<ol>
+				<li><a href=""></a></li>
+			</ol>
+		</section>
+	</div><!-- content -->
+	<footer>
+		<ul>
+			<li><h6>Site Index</h6></li>
+			<li><a href="index.html">Home</a></li>|
+			<li><a href="tags.php">Tags</a></li>|
+			<li><a href="about.html">About</a></li>
+		</ul>
+		<p>Copyright 2011 &copy; Travis K. Leonard
+	</footer>
+</body>
+</html>

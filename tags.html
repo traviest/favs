@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<title>Favorites</title>
+	<link rel="shortcut icon" href="favicon.ico" />
+	<link rel="stylesheet" href="styles.css" />
+	
+	<script src="js/jquery.js"></script>
+	<script src="js/jquery.plugins.js"></script>
+	<script src="js/farbtastic.js"></script>
+	<script src="js/functions.js"></script>
+	<script src="js/menu.js"></script>
+	<script src="js/popup.js"></script>
+	<script>
+	
+	
+		// use index of? substrings ==
+		// to check and make sure not 'same' link
+		// only display 1 of each 'similar' links
+		
+		
+	
+		$(document).ready(function() {
+			/* LOAD ALL TAGS from items (and count for each) */
+			var allTags = new Array(),
+				allTagCounts = new Array();
+			var url = window.location.href
+				vars = url.indexOf("?");			
+			if (vars >= 0) {
+				var showTagTitle = getValue("t");
+			}
+			var getItems = $.get("xml/items.xml", function(t){
+				$(t).find('item').each(function(){
+				
+			        var tags = $(this).attr('tags'),
+			        	itemTags = tags.split(',');
+			        		
+			        for(x = 0; x < itemTags.length; x++) {
+			        
+			        	var tagFound = false;
+			        	allTagCounts.push(itemTags[x].trim());
+			        	
+			        	for(y = 0; y < allTags.length; y++) {
+			        		if(allTags[y] == itemTags[x].trim())
+			        			tagFound = true;
+			        	}
+			        	if(!tagFound) {
+			        		if(itemTags[x] != '')
+			        			allTags.push(itemTags[x].trim());
+			        	}
+			        }
+			    });
+			});
+			getItems.complete(function() {
+				var tagCount,
+					tagsHTML = '';
+				allTags.sort();
+				for(x = 0; x < allTags.length; x++) {
+					tagCount = 0;
+					for(y = 0; y < allTagCounts.length; y++) {
+						if(allTags[x] == allTagCounts[y])
+							tagCount++;
+					}
+					tagsHTML += '<li><a href="#" class="tag"><span class="tag_name">'+allTags[x]+'</span>'
+							+ '<span class="tag_count">'+tagCount+'</span></a></li>';
+				}
+				$('#tags > ol').append(tagsHTML);
+				// determine a default tag or selected tag 
+				var vars = window.location.href.indexOf("?");
+				if (vars >= 0) {
+					var showTagTitle = getValue("t");
+					if(showTagTitle == undefined || showTagTitle == '') {
+						defaultTag();
+					} else {
+						changeTag(showTagTitle);
+						$('#tags').find('.tag_name').each(function() {
+							if( $(this).text() == showTagTitle.trim()) {
+								$(this).parent('.tag').addClass('current_tag');
+								tagPadUp('.current_tag');
+							}
+						});
+					}
+					tagPadUp('.current_tag');
+				} else
+					defaultTag();
+				// tag change				
+				$('.tag').click(function() {
+					tagPadDown('.current_tag');
+					$('.current_tag').not($(this)).removeClass('current_tag');
+					$(this).not('.current_tag').addClass('current_tag');
+					tagPadUp($(this));
+					changeTag($(this).find('.tag_name').text());
+					return false;
+				});
+				// tag hover
+				$('.tag').hover(function() { tagPadUp($(this)); }, 
+					function() { tagPadDown($(this).not('.current_tag')); });
+				// main site functionality
+				siteFunctions();
+			});
+		});
+		function defaultTag() {
+			var firstTag = $('#tags ol li:first-child a');
+			firstTag.addClass('current_tag');
+			changeTag(firstTag.find('.tag_name').text());
+			tagPadUp(firstTag);
+		}
+		function changeTag(tagTitle) {
+			var tagsHTML = '',
+				tagItems = new Array();
+			var getItems = $.get("xml/items.xml", function(d){
+				$(d).find('item').each(function(){
+			        var $item = $(this),
+			        	tags = $item.attr('tags'),
+			        	title = $item.find('title').text(),
+			        	url = $item.find('url').text(),
+			        	desc = $item.find('desc').text(),
+			        	allTags = tags.split(',');
+			        	
+			        for(x = 0; x < allTags.length; x++) {
+			        	if(allTags[x].trim() == tagTitle.trim()) {
+			        		tagItems.push(title+'|'+url+'|'+desc);
+			        	}
+			        }
+			    });
+			});
+			getItems.complete(function() {
+				tagsHTML += '<section id="tag_list"><ol>';				
+				for(y = 0; y < tagItems.length; y++) {
+					var itemDetails = tagItems[y].split('|'),
+						itemTitle = itemDetails[0],
+						itemURL = itemDetails[1],
+						itemDesc = itemDetails[2];
+						
+					tagsHTML += '<li><a href="'+itemURL+'">'+itemTitle+'</a>'+itemDesc+'</li>';
+				}
+				$('#tag_list').remove();
+				$(tagsHTML).insertAfter('#tags');
+				$('#tag_list > ol > li:even').css({'margin-right':'10px'});
+				updateColor($.cookie('color'));
+				linksHover();
+			});
+		}
+		function tagPadUp(tag) {
+			$(tag).stop().animate({ paddingRight: ($('.tag_count', tag).outerWidth() - 5) });
+		}
+		function tagPadDown(tag) {
+			$(tag).stop().animate({ paddingRight: 5 });
+		}
+	</script>
+	<noscript><p>You'd enjoy this much more if you had javascript.</p></noscript>
+</head>
+<body>
+	<header id="header"><div class="wrap">
+		<h1><a href="index.html">Favorites</a></h1>
+		<form method="" action="" id="searcher">
+			<input type="search" name="search" value="" placeholder="username" onkeyup="liveSearch(this.value)"/>
+			<input type="button" name="user_go" value="Search" onclick="searchUsers()"/>
+		</form>
+		<div id="liveResults"></div>
+		<div id="nav"></div>
+		<div id="menu_items"></div>
+	</div></header>
+	<ul id="breadcrumb">
+		<li id="home_crumb"><a href="index.html"></a></li>
+		<li><h6>Tags</h6></li>
+	</ul>
+	<div id="content">
+		<section id="tags">
+			<h4>Tags</h4>
+			<ol></ol>
+		</section>
+	</div><!-- content -->
+	
+	<footer>
+		<ul>
+			<li><h6>Site Index</h6></li>
+			<li><a href="index.html">Home</a></li>|
+			<li><a href="tags..html">Tags</a></li>|
+			<li><a href="about.html">About</a></li>
+		</ul>
+		<p>Copyright 2011 &copy; Travis K. Leonard
+	</footer>
+</body>
+</html>

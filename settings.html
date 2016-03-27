@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<title>Favorites</title>
+	<link rel="shortcut icon" href="favicon.ico" />
+	<link rel="stylesheet" href="styles.css" />
+	
+	<script src="js/jquery.js"></script>
+	<script src="js/jquery.plugins.js"></script>
+	<script src="js/farbtastic.js"></script>
+	<script src="js/functions.js"></script>
+	<script src="js/menu.js"></script>
+	<script src="js/popup.js"></script>
+	<script>
+		$(document).ready(function() {
+			$('#user_crumb').find('h6').html($.cookie('username'));
+			$('h3').html($.cookie('username')+"\'s Account");
+			
+			var id, username, name, email, location, routine, pic;
+			var getUserInfo = $.get("xml/users.xml",function(u) {
+				$(u).find('user').each(function() {
+					if($.cookie('username') == $(this).find('username').text()) {
+						id = $(this).find('id').text(),
+						username = $(this).find('username').text(),
+						name = $(this).find('name').text(),
+						email = $(this).find('email').text(),
+						location = $(this).find('location').text(),
+						routine = $(this).find('routine').text(),
+						pic = $(this).find('pic').text();
+					}
+				});
+			});
+			getUserInfo.complete(function() {
+				var userHTML = "<img src=\"img/users/"+pic+"\" class=\"acct_pic\"/>"
+					+ "<table id='stats'>"
+					//+ "<tr><td>Password: </td><td style="display:none;"></td></tr>"
+					+ "<tr><td>Name: </td><td>"+name+"</td></tr>"
+					+ "<tr><td>Email: </td><td>"+email+"</td></tr>"
+					+ "<tr><td>Username: </td><td>"+username+"</td></tr>"
+					+ "<tr><td>Location: </td><td>"+location+"</td></tr>"
+					+ "<tr><td>Routine: </td><td>"+routine+"</td></tr>"
+					+ "</table>";
+				$('#content').append(userHTML);
+			});
+			siteFunctions();
+		});
+	</script>
+	<noscript><p>You'd enjoy this much more if you had javascript.</p></noscript>
+</head>
+<body>
+	<header id="header"><div class="wrap">
+		<h1><a href="index.html">Favorites</a></h1>
+		<form method="" action="" id="searcher">
+			<input type="search" name="search" value="" placeholder="username" onkeyup="liveSearch(this.value)"/>
+			<input type="button" name="user_go" value="Search" onclick="searchUsers()"/>
+		</form>
+		<div id="liveResults"></div>
+		<div id="nav"></div>
+		<div id="menu_items"></div>
+	</div></header>
+	<ul id="breadcrumb">
+		<li id="home_crumb"><a href="index.html"></a></li>
+		<li id="user_crumb"><a href="user.html"><h6></h6></a></li>
+		<li><h6>Settings</h6></li>
+	</ul>
+	<div id="content">
+		<h3></h3>
+		<a href="#" class="edit" title="account" onclick="popup('edit')">Edit</a>
+	</div><!-- content -->
+	
+	<footer>
+		<ul>
+			<li><h6>Site Index</h6></li>
+			<li><a href="index.html">Home</a></li>|
+			<li><a href="tags.html">Tags</a></li>|
+			<li><a href="about.html">About</a></li>
+		</ul>
+		<p>Copyright 2011 &copy; Travis K. Leonard
+	</footer>
+</body>
+</html>

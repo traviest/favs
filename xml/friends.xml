@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<friends>
+	<friend>
+		<mainuser>1</mainuser>
+		<trackeduser>2</trackeduser>
+	</friend>
+	<friend>
+		<mainuser>1</mainuser>
+		<trackeduser>3</trackeduser>
+	</friend>
+	<friend>
+		<mainuser>1</mainuser>
+		<trackeduser>4</trackeduser>
+	</friend>
+	<friend>
+		<mainuser>1</mainuser>
+		<trackeduser>5</trackeduser>
+	</friend>
+	<friend>
+		<mainuser>1</mainuser>
+		<trackeduser>6</trackeduser>
+	</friend>
+	
+	
+	<friend>
+		<mainuser>2</mainuser>
+		<trackeduser>1</trackeduser>
+	</friend>
+	<friend>
+		<mainuser>3</mainuser>
+		<trackeduser>1</trackeduser>
+	</friend>
+	<friend>
+		<mainuser>4</mainuser>
+		<trackeduser>1</trackeduser>
+	</friend>
+	<friend>
+		<mainuser>5</mainuser>
+		<trackeduser>1</trackeduser>
+	</friend>
+	<friend>
+		<mainuser>6</mainuser>
+		<trackeduser>1</trackeduser>
+	</friend>
+</friends>
